@@ -1,0 +1,63 @@
+import static java.lang.System.getenv
+
+plugins {
+    id 'idea'
+    id 'java'
+    id 'signing'
+    id 'maven-publish'
+}
+
+repositories { mavenCentral() }
+apply from: "${projectDir}/util.gradle"
+
+version = '1.0'
+group = 'com.github.vault'
+sourceCompatibility = '1.8'
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.8'
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    implementation 'commons-io:commons-io:2.6'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.11'
+    implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}") {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+}
+
+publishing {
+    publications {
+        springvaultloader(MavenPublication) {
+            from components.java
+            groupId = project.group
+            version = updateVersion()
+            artifactId = project.archivesBaseName
+        }
+    }
+    repositories {
+        maven {
+            name ''
+            url
+            credentials {
+                password = "${getenv('USER')}"
+                username = "${getenv('PASS')}"
+            }
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+java {
+    withSourcesJar()
+}
+
+jar {
+    enabled = true
+    archiveBaseName = 'spring-vault-loader'
+    manifest { attributes('Specification-Version': archiveVersion) }
+}
+
+compileJava.dependsOn(processResources)

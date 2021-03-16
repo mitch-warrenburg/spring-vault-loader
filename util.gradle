@@ -1,0 +1,10 @@
+import static java.lang.String.format
+import static java.lang.Double.parseDouble
+
+ext.updateVersion = {
+    File file = file("$projectDir/version.txt")
+    project.version = format("%.3f", parseDouble(file.readLines()[0]) + 0.001)
+    file.write("$project.version")
+    println("New version to publish: $project.version")
+    return version
+}
